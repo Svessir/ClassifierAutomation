@@ -1,6 +1,10 @@
 package is.ru.machinelearning;
 
+import weka.classifiers.AbstractClassifier;
 import weka.core.Instances;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.List;
 
 /**
@@ -11,7 +15,14 @@ public class WekaRunner {
     private Instances data;
 
     private void loadData() {
-
+        try {
+            data = new Instances(
+                    new BufferedReader(new FileReader("letter-recognition.arff")));
+            data.setClassIndex(0);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void run() {
@@ -24,8 +35,8 @@ public class WekaRunner {
 
         // Load the data to the trainers and train the classifiers
         for (ClassifierTrainer trainer: trainers) {
-            trainer.setDataSet(data);
-            trainer.train();
+            trainer.setDataSet(data, 16000);
+            TrainerOutput output = trainer.train();
         }
     }
 
