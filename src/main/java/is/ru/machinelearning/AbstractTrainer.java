@@ -17,6 +17,21 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractTrainer implements ClassifierTrainer{
 
+    protected class TrainerParameter {
+        public Number value;
+        public Float error;
+
+        public TrainerParameter(Number value, Float error) {
+            this.value = value;
+            this.error = error;
+        }
+    }
+
+    protected class ParameterInterval {
+        public Number min;
+        public Number max;
+    }
+
     protected Instances dataSet;                    // Complete data
     protected int numberOfTrainingInstances;
 
