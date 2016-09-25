@@ -4,16 +4,17 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="j48" class="is.ru.machinelearning.J48Trainer"/>
+    <bean id="ada-boost" class="is.ru.machinelearning.AdaBoostTrainer"/>
     <!--Add KNN-->
     <!--Add NeuralNetwork-->
     <!--Add BayesNaive-->
-    <!--Add AdaBoost-->
     <!--Add Bagging-->
 
     <bean id="trainers" class="java.util.ArrayList">
         <constructor-arg>
             <list>
-                <ref bean="j48" />
+                <!--<ref bean="j48" />-->
+                <ref bean="ada-boost" />
             </list>
         </constructor-arg>
     </bean>

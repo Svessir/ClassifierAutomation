@@ -5,43 +5,60 @@ import java.util.Comparator;
 /**
  * Object that contains the modifiable hyper parameters for a j48 tree
  */
-public class J48Parameters {
+public class J48Parameters extends AbstractHyperParameters{
     public  int minNumObj;
     public  int numFold;
     public  float confidenceFactor;
 
-    public static final Comparator<J48Parameters> minNumObjComparator = new Comparator<J48Parameters>() {
-        public int compare(J48Parameters o1, J48Parameters o2) {
-            if(o1.minNumObj < o2.minNumObj)
+    public static final Comparator<AbstractHyperParameters> minNumObjComparator = new Comparator<AbstractHyperParameters>() {
+        public int compare(AbstractHyperParameters o1, AbstractHyperParameters o2) {
+            if(!(o1 instanceof J48Parameters) || !(o2 instanceof J48Parameters))
                 return -1;
-            else if(o1.minNumObj > o2.minNumObj)
+
+            J48Parameters ob1 = (J48Parameters) o1;
+            J48Parameters ob2 = (J48Parameters) o2;
+
+            if(ob1.minNumObj < ob2.minNumObj)
+                return -1;
+            else if(ob1.minNumObj > ob2.minNumObj)
                 return 1;
             return 0;
         }
     };
 
-    public static final Comparator<J48Parameters> numFoldComparator = new Comparator<J48Parameters>() {
-        public int compare(J48Parameters o1, J48Parameters o2) {
-            if(o1.numFold < o2.numFold)
+    public static final Comparator<AbstractHyperParameters> numFoldComparator = new Comparator<AbstractHyperParameters>() {
+        public int compare(AbstractHyperParameters o1, AbstractHyperParameters o2) {
+
+            if(!(o1 instanceof J48Parameters) || !(o2 instanceof J48Parameters))
                 return -1;
-            else if(o1.numFold > o2.numFold)
+
+            J48Parameters ob1 = (J48Parameters) o1;
+            J48Parameters ob2 = (J48Parameters) o2;
+
+            if(ob1.numFold < ob2.numFold)
+                return -1;
+            else if(ob1.numFold > ob2.numFold)
                 return 1;
             return 0;
         }
     };
 
-    public static final Comparator<J48Parameters> confidenceFactorComparator = new Comparator<J48Parameters>() {
-        public int compare(J48Parameters o1, J48Parameters o2) {
-            if(o1.confidenceFactor < o2.confidenceFactor)
+    public static final Comparator<AbstractHyperParameters> confidenceFactorComparator = new Comparator<AbstractHyperParameters>() {
+        public int compare(AbstractHyperParameters o1, AbstractHyperParameters o2) {
+
+            if(!(o1 instanceof J48Parameters) || !(o2 instanceof J48Parameters))
                 return -1;
-            else if(o1.confidenceFactor > o2.confidenceFactor)
+
+            J48Parameters ob1 = (J48Parameters) o1;
+            J48Parameters ob2 = (J48Parameters) o2;
+
+            if(ob1.confidenceFactor < ob2.confidenceFactor)
+                return -1;
+            else if(ob1.confidenceFactor > ob2.confidenceFactor)
                 return 1;
             return 0;
         }
     };
-
-    // error caused by this parameter setting
-    public float errorPercentage;
 
     public J48Parameters(int minNumObj, int numFold, float confidenceFactor) {
         this.minNumObj = minNumObj;
