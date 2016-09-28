@@ -53,7 +53,7 @@ public abstract class AbstractTrainer implements ClassifierTrainer{
     }
 
     public TrainerOutput train() {
-
+        // Create and train on samples until break condition is met
         while(continueTraining()) {
             loadSamples();
             int i = 0;
@@ -70,8 +70,11 @@ public abstract class AbstractTrainer implements ClassifierTrainer{
                 }
                 System.out.println(i + " " + params);
             }
+            afterRound();
             updateParametersIntervals();
         }
+
+        plotTrainingInfo();
         System.out.println(bestEvaluation.toSummaryString());
         return new TrainerOutput(bestClassifier, bestEvaluation);
     }
@@ -141,7 +144,7 @@ public abstract class AbstractTrainer implements ClassifierTrainer{
         Collections.sort(randomSamples, comparator);
 
         // Get first average error interval
-        for(int i = 0; i <= halfNumberOfPoints; i++)
+        for(int i = 0; i < halfNumberOfPoints; i++)
             currentAvg += randomSamples.get(i).errorPercentage;
 
         currentAvg /= numberOfPoints;
@@ -162,6 +165,15 @@ public abstract class AbstractTrainer implements ClassifierTrainer{
         }
 
         return bestIndex;
+    }
+
+    /**
+     * Called after each random sample round
+     */
+    protected void afterRound() {
+    }
+
+    protected void plotTrainingInfo() {
     }
 
     protected abstract boolean continueTraining();

@@ -5,7 +5,7 @@
 
     <bean id="j48" class="is.ru.machinelearning.J48Trainer"/>
     <bean id="ada-boost" class="is.ru.machinelearning.AdaBoostTrainer"/>
-    <!--Add KNN-->
+    <bean id="knn" class="is.ru.machinelearning.KnnTrainer"/>
     <!--Add NeuralNetwork-->
     <!--Add BayesNaive-->
     <!--Add Bagging-->
@@ -14,7 +14,8 @@
         <constructor-arg>
             <list>
                 <!--<ref bean="j48" />-->
-                <ref bean="ada-boost" />
+                <ref bean="knn" />
+                <!--<ref bean="ada-boost" />-->
             </list>
         </constructor-arg>
     </bean>

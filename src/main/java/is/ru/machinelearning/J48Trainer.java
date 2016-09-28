@@ -12,6 +12,8 @@ public class J48Trainer extends AbstractTrainer {
     private J48Parameters maxParams;
     private int numberOfSamples;
 
+    private ArrayList<ArrayList<AbstractHyperParameters>> allParamsTested = new ArrayList<ArrayList<AbstractHyperParameters>>();
+
     public J48Trainer() {
         // Read from properties file min and max values for the hyper parameters.
         properties = loadProperties("j48.properties");
@@ -100,5 +102,42 @@ public class J48Trainer extends AbstractTrainer {
         maxParams.confidenceFactor = bestIndex + numberOfPoints >= randomSamples.size() ?
                 ((J48Parameters)randomSamples.get(randomSamples.size() - 1)).confidenceFactor :
                 ((J48Parameters)randomSamples.get(bestIndex + numberOfPoints)).confidenceFactor;
+    }
+
+    @Override
+    protected void afterRound() {
+        /**
+         * Store the random samples so they can be plotted in the end of training
+         */
+        if(!randomSamples.isEmpty()) {
+            allParamsTested.add(new ArrayList<AbstractHyperParameters>(randomSamples));
+        }
+    }
+
+    @Override
+    protected void plotTrainingInfo() {
+        ScatterCharter charter = new ScatterCharter();
+        ArrayList<ArrayList<ScatterPoint>> minNumbObjs = new ArrayList<ArrayList<ScatterPoint>>();
+        ArrayList<ArrayList<ScatterPoint>> numFold = new ArrayList<ArrayList<ScatterPoint>>();
+        ArrayList<ArrayList<ScatterPoint>> confidenceFactor = new ArrayList<ArrayList<ScatterPoint>>();
+
+        for(ArrayList<AbstractHyperParameters> round : allParamsTested) {
+            ArrayList<ScatterPoint> minNumbRound = new ArrayList<ScatterPoint>();
+            ArrayList<ScatterPoint> numFoldRound = new ArrayList<ScatterPoint>();
+            ArrayList<ScatterPoint> confidenceRound = new ArrayList<ScatterPoint>();
+            for(AbstractHyperParameters p : round) {
+                J48Parameters j = (J48Parameters)p;
+                minNumbRound.add(new ScatterPoint(j.minNumObj, j.errorPercentage));
+                numFoldRound.add(new ScatterPoint(j.numFold, j.errorPercentage));
+                confidenceRound.add(new ScatterPoint(j.confidenceFactor, j.errorPercentage));
+            }
+            minNumbObjs.add(minNumbRound);
+            numFold.add(numFoldRound);
+            confidenceFactor.add(confidenceRound);
+        }
+
+        charter.createChart(minNumbObjs, "MinNumbObj", "Error Rate", "MinNumberOfObjects");
+        charter.createChart(numFold, "NumFold", "Error Rate", "NumFold");
+        charter.createChart(confidenceFactor, "ConfidenceFactor", "Error Rate", "ConfidenceFactor");
     }
 }

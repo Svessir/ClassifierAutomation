@@ -1,11 +1,23 @@
 package is.ru.machinelearning;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartFrame;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Instances;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by Sverrir on 22.9.2016.
