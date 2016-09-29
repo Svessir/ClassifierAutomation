@@ -3,6 +3,7 @@ package is.ru.machinelearning;
 import weka.classifiers.meta.AdaBoostM1;
 import weka.classifiers.trees.J48;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -13,6 +14,9 @@ public class AdaBoostTrainer extends AbstractTrainer {
     private AdaBoostParameters minParams;
     private AdaBoostParameters maxParams;
     private int numberOfSamples;
+
+    private ArrayList<ArrayList<AbstractHyperParameters>> allParamsTested = new ArrayList<ArrayList<AbstractHyperParameters>>();
+    private int i = 0;
 
     public AdaBoostTrainer() {
         // Read from properties file min and max values for the hyper parameters.
@@ -32,8 +36,8 @@ public class AdaBoostTrainer extends AbstractTrainer {
     }
 
     protected boolean continueTraining() {
-        return maxParams.numIterations - minParams.numIterations >= 5 ||
-                maxParams.weightThreshold - minParams.weightThreshold >= 5;
+        return  i == 0;/*maxParams.numIterations - minParams.numIterations >= 5 ||
+                maxParams.weightThreshold - minParams.weightThreshold >= 5;*/
     }
 
     protected void loadSamples() {
@@ -76,5 +80,38 @@ public class AdaBoostTrainer extends AbstractTrainer {
         maxParams.weightThreshold = bestIndex + numberOfPoints >= randomSamples.size() ?
                 ((AdaBoostParameters)randomSamples.get(randomSamples.size() - 1)).weightThreshold :
                 ((AdaBoostParameters)randomSamples.get(bestIndex + numberOfPoints)).weightThreshold;
+    }
+
+    @Override
+    protected void afterRound() {
+        /**
+         * Store the random samples so they can be plotted in the end of training
+         */
+        i++;
+        if(!randomSamples.isEmpty()) {
+            allParamsTested.add(new ArrayList<AbstractHyperParameters>(randomSamples));
+        }
+    }
+
+    @Override
+    protected void plotTrainingInfo() {
+        ScatterCharter charter = new ScatterCharter();
+        ArrayList<ArrayList<ScatterPoint>> numIterations = new ArrayList<ArrayList<ScatterPoint>>();
+        ArrayList<ArrayList<ScatterPoint>> weightThreshold = new ArrayList<ArrayList<ScatterPoint>>();
+
+        for(ArrayList<AbstractHyperParameters> round : allParamsTested) {
+            ArrayList<ScatterPoint> numIterationsRound = new ArrayList<ScatterPoint>();
+            ArrayList<ScatterPoint> weightThresholdRound = new ArrayList<ScatterPoint>();
+            for(AbstractHyperParameters p : round) {
+                AdaBoostParameters a = (AdaBoostParameters)p;
+                numIterationsRound.add(new ScatterPoint(a.numIterations, a.errorPercentage));
+                weightThresholdRound.add(new ScatterPoint(a.weightThreshold, a.errorPercentage));
+            }
+            numIterations.add(numIterationsRound);
+            weightThreshold.add(weightThresholdRound);
+        }
+
+        charter.createChart(numIterations, "Number of Iterations", "Error Rate", "NumberOfIterations");
+        charter.createChart(weightThreshold, "Weight Threshold", "Error Rate", "WeightThreshold");
     }
 }

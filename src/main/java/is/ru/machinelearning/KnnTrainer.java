@@ -10,6 +10,8 @@ import java.util.Random;
  */
 public class KnnTrainer extends AbstractTrainer {
 
+    private final KnnParameters originalMinParams;
+    private final KnnParameters originalMaxParams;
     private KnnParameters minParams;
     private KnnParameters maxParams;
     private int numberOfSamples;
@@ -22,20 +24,21 @@ public class KnnTrainer extends AbstractTrainer {
         properties = loadProperties("knn.properties");
         minParams = new KnnParameters
                 (
-                        Integer.parseInt(properties.getProperty("minKNN")),
-                        Integer.parseInt(properties.getProperty("minWindowSize"))
+                        Integer.parseInt(properties.getProperty("minKNN"))
                 );
         maxParams = new KnnParameters
                 (
-                        Integer.parseInt(properties.getProperty("maxKNN")),
-                        Integer.parseInt(properties.getProperty("maxWindowSize"))
+                        Integer.parseInt(properties.getProperty("maxKNN"))
                 );
+
+        originalMinParams = new KnnParameters(minParams.KNN);
+        originalMaxParams = new KnnParameters(maxParams.KNN);
 
         numberOfSamples = Integer.parseInt(properties.getProperty("numberOfSamples"));
     }
 
     protected boolean continueTraining() {
-        return i < 1 && (maxParams.KNN - minParams.KNN != 0 || maxParams.windowSize - minParams.windowSize != 0);
+        return !(maxParams.KNN - minParams.KNN < 10);
     }
 
     protected void loadSamples() {
@@ -44,8 +47,7 @@ public class KnnTrainer extends AbstractTrainer {
         for(int i = 0; i < numberOfSamples; i++) {
             randomSamples.add(new KnnParameters
                     (
-                            rand.nextInt(maxParams.KNN - minParams.KNN + 1) + minParams.KNN,
-                            rand.nextInt(maxParams.windowSize - minParams.windowSize + 1) + minParams.windowSize
+                            rand.nextInt(maxParams.KNN - minParams.KNN + 1) + minParams.KNN
                     ));
         }
     }
@@ -56,7 +58,6 @@ public class KnnTrainer extends AbstractTrainer {
 
         IBk ibk = new IBk();
         ibk.setKNN(((KnnParameters)params).KNN);
-        ibk.setWindowSize(((KnnParameters)params).windowSize);
         classifier = ibk;
     }
 
@@ -69,14 +70,6 @@ public class KnnTrainer extends AbstractTrainer {
         maxParams.KNN = bestIndex + numberOfPoints >= randomSamples.size() ?
                 ((KnnParameters)randomSamples.get(randomSamples.size() - 1)).KNN :
                 ((KnnParameters)randomSamples.get(bestIndex + numberOfPoints)).KNN;
-
-        bestIndex = getIndexOfLowestError(KnnParameters.windowSizeComparator, numberOfPoints);
-
-        minParams.windowSize = bestIndex - numberOfPoints < 0 ? ((KnnParameters)randomSamples.get(0)).windowSize :
-                ((KnnParameters)randomSamples.get(bestIndex - numberOfPoints)).windowSize;
-        maxParams.windowSize = bestIndex + numberOfPoints >= randomSamples.size() ?
-                ((KnnParameters)randomSamples.get(randomSamples.size() - 1)).windowSize :
-                ((KnnParameters)randomSamples.get(bestIndex + numberOfPoints)).windowSize;
     }
 
     @Override
@@ -94,21 +87,16 @@ public class KnnTrainer extends AbstractTrainer {
     protected void plotTrainingInfo() {
         ScatterCharter charter = new ScatterCharter();
         ArrayList<ArrayList<ScatterPoint>> KNN = new ArrayList<ArrayList<ScatterPoint>>();
-        ArrayList<ArrayList<ScatterPoint>> windowSize = new ArrayList<ArrayList<ScatterPoint>>();
 
         for(ArrayList<AbstractHyperParameters> round : allParamsTested) {
             ArrayList<ScatterPoint> KNNRound = new ArrayList<ScatterPoint>();
-            ArrayList<ScatterPoint> windowSizeRound = new ArrayList<ScatterPoint>();
             for(AbstractHyperParameters p : round) {
                 KnnParameters k = (KnnParameters)p;
                 KNNRound.add(new ScatterPoint(k.KNN, k.errorPercentage));
-                windowSizeRound.add(new ScatterPoint(k.windowSize, k.errorPercentage));
             }
             KNN.add(KNNRound);
-            windowSize.add(windowSizeRound);
         }
 
-        charter.createChart(KNN, "KNN", "Error Rate", "KNearestNeighbours");
-        charter.createChart(windowSize, "WindowSize", "Error Rate", "WindowSize");
+        charter.createChart(KNN, "KNN", "Error Rate", "K Nearest Neighbours");
     }
 }

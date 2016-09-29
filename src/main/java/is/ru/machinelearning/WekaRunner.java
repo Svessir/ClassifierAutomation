@@ -55,5 +55,7 @@ public class WekaRunner {
     public static void main(String args[]) {
         WekaRunner runner = new WekaRunner();
         runner.run();
-    }
+
+        //System.out.println(Math.pow(Math.E, Math.log(2)/5));
+}
 }

@@ -24,6 +24,7 @@ public class ScatterCharter {
         for(List<ScatterPoint> list : points) {
             roundNumber++;
             XYSeries round = new XYSeries("Round " + roundNumber);
+
             for (ScatterPoint p : list) {
                 round.add(p.x, p.y);
             }
@@ -31,7 +32,8 @@ public class ScatterCharter {
             set.addSeries(round);
         }
         JFreeChart chart = ChartFactory.createScatterPlot(plotName, xName, yName, set, PlotOrientation.VERTICAL, true,true,true);
-
+        plotName = plotName.replaceAll("\\s", "");
+        plotName = plotName.toLowerCase();
         File file = new File(plotName + ".png");
         try {
             ChartUtilities.saveChartAsPNG(file, chart, 800, 800);
