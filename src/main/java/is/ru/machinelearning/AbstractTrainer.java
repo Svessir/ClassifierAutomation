@@ -44,6 +44,7 @@ public abstract class AbstractTrainer implements ClassifierTrainer{
             int i = 0;
             for(AbstractHyperParameters params : randomSamples ) {
                 i++;
+                System.out.println(i + " " + params + ". error: " + params.errorPercentage);
                 newClassifier(params);
 
                 try {
@@ -53,7 +54,6 @@ public abstract class AbstractTrainer implements ClassifierTrainer{
                 catch (Exception e) {
                     e.printStackTrace();
                 }
-                System.out.println(i + " " + params + ". error: " + params.errorPercentage);
             }
             afterRound();
             updateParametersIntervals();

@@ -100,4 +100,9 @@ public class MultiLayerPerceptronParameters extends AbstractHyperParameters {
         this.validationThreshold = validationThreshold;
         this.trainingTime = trainingTime;
     }
+
+    public String toString() {
+        return "learning Rate: " + learningRate + ", momentum: " + momentum + ", validationSetSize: " + validationSize
+                + ",validationThreshold: " + validationThreshold + ", trainingTime:" + trainingTime;
+    }
 }

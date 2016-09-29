@@ -238,7 +238,7 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
                 MultiLayerPerceptronParameters.learningRateComparator : MultiLayerPerceptronParameters.momentumComparator;
         double base = isLearningRate ? learningRateBase : momentumBase;
         double logBase = Math.log(base);
-        int minExponent = isLearningRate ? minLearningRateExponent : maxMomentumExponent;
+        int minExponent = isLearningRate ? minLearningRateExponent : minMomentumExponent;
         int maxExponent = isLearningRate ? maxLearningRateExponent : maxMomentumExponent;
 
         Collections.sort(randomSamples, comparator);
