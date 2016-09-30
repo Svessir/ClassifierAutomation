@@ -72,7 +72,7 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
 
     protected boolean continueTraining() {
         // Terminate when all params have been narrowed down to 1% of the interval of the original params
-        return  numberOfSamples > 5 &&
+        return  numberOfSamples > 10 &&
                 (maxParams.learningRate - minParams.learningRate)/(originalMax.learningRate - originalMin.learningRate) > 0.01 ||
                 (maxParams.momentum - minParams.momentum) / (originalMax.momentum - originalMin.momentum) > 0.01 ||
                 (maxParams.validationSize - minParams.validationSize) / (originalMax.validationSize - minParams.validationSize) > 0.1 ||
@@ -81,6 +81,8 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
     }
 
     protected void loadSamples() {
+        System.out.println("minParams: " + minParams);
+        System.out.println("maxParams: " + maxParams);
         randomSamples.clear();
         Random rand = new Random();
         for(int i = 0; i < numberOfSamples; i++) {
@@ -112,7 +114,8 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
 
     protected void updateParametersIntervals() {
         int numberOfPoints = randomSamples.size() / 4;
-        numberOfSamples /= 2;
+        if(numberOfSamples > 10)
+            numberOfSamples /= 2;
         updateLearningRate();
         updateMomentum();
 
@@ -132,7 +135,7 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
                 ((MultiLayerPerceptronParameters)randomSamples.get(randomSamples.size() - 1)).validationThreshold :
                 ((MultiLayerPerceptronParameters)randomSamples.get(bestIndex + numberOfPoints)).validationThreshold;
 
-        bestIndex =  getIndexOfLowestError(MultiLayerPerceptronParameters.validationThresholdComparator, numberOfPoints);
+        bestIndex =  getIndexOfLowestError(MultiLayerPerceptronParameters.trainingTimeComparator, numberOfPoints);
 
         minParams.trainingTime = bestIndex - numberOfPoints < 0 ? ((MultiLayerPerceptronParameters)randomSamples.get(0)).trainingTime :
                 ((MultiLayerPerceptronParameters)randomSamples.get(bestIndex - numberOfPoints)).trainingTime;
@@ -243,6 +246,11 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
         int minExponent = isLearningRate ? minLearningRateExponent : minMomentumExponent;
         int maxExponent = isLearningRate ? maxLearningRateExponent : maxMomentumExponent;
 
+        System.out.println("minExponent: " + minExponent);
+        System.out.println("maxExponent: " + maxExponent);
+        System.out.println("logBase: " + logBase);
+        System.out.println("size: " + (maxExponent - minExponent + 1));
+
         Collections.sort(randomSamples, comparator);
 
         double[][] errorList = new double[maxExponent - minExponent + 1][2];
@@ -252,7 +260,10 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
             double value = isLearningRate ? m.learningRate : m.momentum;
             int exponent = (int)Math.round(Math.log(value) / logBase);
             int index = exponent < 0 ? -exponent : exponent;
-            index -= minExponent < 0 ? -minExponent : minExponent;
+            index += maxExponent;
+
+            System.out.println("Exponent: " + exponent);
+            System.out.println("index: " + index);
 
             errorList[index][0] += m.errorPercentage;
             errorList[index][1] += 1.0;
@@ -270,9 +281,11 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
 
             if(avgError < lowestError) {
                 lowestError = avgError;
-                bestExponent = -i;
+                bestExponent = -(i - maxExponent);
             }
         }
+
+        System.out.println("bestExponent:" + bestExponent);
         return bestExponent;
     }
 }
