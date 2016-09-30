@@ -14,10 +14,10 @@
     <bean id="trainers" class="java.util.ArrayList">
         <constructor-arg>
             <list>
-                <!--<ref bean="j48" />-->
-                <!--<ref bean="knn" />-->
+                <ref bean="j48" />
+                <ref bean="knn" />
                 <ref bean="mlp" />
-                <!--<ref bean="ada-boost" />-->
+                <ref bean="ada-boost" />
             </list>
         </constructor-arg>
     </bean>

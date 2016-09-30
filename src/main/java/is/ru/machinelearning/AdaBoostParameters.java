@@ -8,10 +8,12 @@ import java.util.Comparator;
 public class AdaBoostParameters extends AbstractHyperParameters{
     public int numIterations;
     public int weightThreshold;
+    public int minNumbObj;
 
-    public AdaBoostParameters(int numIterations, int weightThreshold) {
+    public AdaBoostParameters(int numIterations, int weightThreshold, int minNumbObj) {
         this.numIterations = numIterations;
         this.weightThreshold = weightThreshold;
+        this.minNumbObj = minNumbObj;
     }
 
     public static final Comparator<AbstractHyperParameters> numIterationsComparator = new Comparator<AbstractHyperParameters>() {
@@ -46,7 +48,23 @@ public class AdaBoostParameters extends AbstractHyperParameters{
         }
     };
 
+    public static final Comparator<AbstractHyperParameters> minNumbComparator = new Comparator<AbstractHyperParameters>() {
+        public int compare(AbstractHyperParameters o1, AbstractHyperParameters o2) {
+            if(!(o1 instanceof AdaBoostParameters) || !(o2 instanceof AdaBoostParameters))
+                return -1;
+
+            AdaBoostParameters ob1 = (AdaBoostParameters) o1;
+            AdaBoostParameters ob2 = (AdaBoostParameters) o2;
+
+            if(ob1.minNumbObj < ob2.minNumbObj)
+                return -1;
+            else if(ob1.minNumbObj > ob2.minNumbObj)
+                return 1;
+            return 0;
+        }
+    };
+
     public String toString() {
-        return "numIterations: " + numIterations + ", weightThreshold: " + weightThreshold;
+        return "numIterations: " + numIterations + ", weightThreshold: " + weightThreshold + ", minNumbObj: " + minNumbObj;
     }
 }

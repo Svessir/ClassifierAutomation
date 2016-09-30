@@ -71,11 +71,12 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
     }
 
     protected boolean continueTraining() {
-        // Terminate when all params have been narrowed down to 10% of the interval of the original params
-        return (maxParams.learningRate - minParams.learningRate)/(originalMax.learningRate - originalMin.learningRate) > 0.1 &&
-                (maxParams.momentum - minParams.momentum) / (originalMax.momentum - originalMin.momentum) > 0.1 &&
-                (maxParams.validationSize - minParams.validationSize) / (originalMax.validationSize - minParams.validationSize) > 0.1 &&
-                (maxParams.validationThreshold - minParams.validationThreshold) / (originalMax.validationThreshold - originalMin.validationThreshold) > 0.1 &&
+        // Terminate when all params have been narrowed down to 1% of the interval of the original params
+        return  numberOfSamples > 5 &&
+                (maxParams.learningRate - minParams.learningRate)/(originalMax.learningRate - originalMin.learningRate) > 0.01 ||
+                (maxParams.momentum - minParams.momentum) / (originalMax.momentum - originalMin.momentum) > 0.01 ||
+                (maxParams.validationSize - minParams.validationSize) / (originalMax.validationSize - minParams.validationSize) > 0.1 ||
+                (maxParams.validationThreshold - minParams.validationThreshold) / (originalMax.validationThreshold - originalMin.validationThreshold) > 0.1 ||
                 (maxParams.trainingTime - minParams.trainingTime) / (originalMax.trainingTime - originalMin.trainingTime) > 0.1;
     }
 
@@ -111,6 +112,7 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
 
     protected void updateParametersIntervals() {
         int numberOfPoints = randomSamples.size() / 4;
+        numberOfSamples /= 2;
         updateLearningRate();
         updateMomentum();
 
@@ -250,6 +252,8 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
             double value = isLearningRate ? m.learningRate : m.momentum;
             int exponent = (int)Math.round(Math.log(value) / logBase);
             int index = exponent < 0 ? -exponent : exponent;
+            index -= minExponent < 0 ? -minExponent : minExponent;
+
             errorList[index][0] += m.errorPercentage;
             errorList[index][1] += 1.0;
         }

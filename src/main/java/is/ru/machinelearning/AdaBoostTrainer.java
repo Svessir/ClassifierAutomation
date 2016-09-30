@@ -24,20 +24,22 @@ public class AdaBoostTrainer extends AbstractTrainer {
         minParams = new AdaBoostParameters
                 (
                         Integer.parseInt(properties.getProperty("minNumIterations")),
-                        Integer.parseInt(properties.getProperty("minWeightThreshold"))
+                        Integer.parseInt(properties.getProperty("minWeightThreshold")),
+                        Integer.parseInt(properties.getProperty("minMinNumbObj"))
                 );
         maxParams = new AdaBoostParameters
                 (
                         Integer.parseInt(properties.getProperty("maxNumIterations")),
-                        Integer.parseInt(properties.getProperty("maxWeightThreshold"))
+                        Integer.parseInt(properties.getProperty("maxWeightThreshold")),
+                        Integer.parseInt(properties.getProperty("maxMinNumbObj"))
                 );
 
         numberOfSamples = Integer.parseInt(properties.getProperty("numberOfSamples"));
     }
 
     protected boolean continueTraining() {
-        return  i == 0;/*maxParams.numIterations - minParams.numIterations >= 5 ||
-                maxParams.weightThreshold - minParams.weightThreshold >= 5;*/
+        return  maxParams.numIterations - minParams.numIterations >= 5 ||
+                maxParams.weightThreshold - minParams.weightThreshold >= 5;
     }
 
     protected void loadSamples() {
@@ -47,7 +49,8 @@ public class AdaBoostTrainer extends AbstractTrainer {
             randomSamples.add(new AdaBoostParameters
                     (
                             rand.nextInt(maxParams.numIterations - minParams.numIterations + 1) + minParams.numIterations,
-                            rand.nextInt(maxParams.weightThreshold - minParams.weightThreshold + 1) + minParams.weightThreshold
+                            rand.nextInt(maxParams.weightThreshold - minParams.weightThreshold + 1) + minParams.weightThreshold,
+                            rand.nextInt(maxParams.minNumbObj - minParams.minNumbObj + 1) + minParams.minNumbObj
                     ));
         }
     }
@@ -57,7 +60,9 @@ public class AdaBoostTrainer extends AbstractTrainer {
             return;
 
         AdaBoostM1 ada = new AdaBoostM1();
-        ada.setClassifier(new J48());
+        J48 j48 = new J48();
+        j48.setMinNumObj(((AdaBoostParameters) params).minNumbObj);
+        ada.setClassifier(j48);
         ada.setNumIterations(((AdaBoostParameters)params).numIterations);
         ada.setWeightThreshold(((AdaBoostParameters)params).weightThreshold);
         classifier = ada;
@@ -80,6 +85,14 @@ public class AdaBoostTrainer extends AbstractTrainer {
         maxParams.weightThreshold = bestIndex + numberOfPoints >= randomSamples.size() ?
                 ((AdaBoostParameters)randomSamples.get(randomSamples.size() - 1)).weightThreshold :
                 ((AdaBoostParameters)randomSamples.get(bestIndex + numberOfPoints)).weightThreshold;
+
+        bestIndex = getIndexOfLowestError(AdaBoostParameters.minNumbComparator, numberOfPoints);
+
+        minParams.minNumbObj = bestIndex - numberOfPoints < 0 ? ((AdaBoostParameters)randomSamples.get(0)).minNumbObj :
+                ((AdaBoostParameters)randomSamples.get(bestIndex - numberOfPoints)).minNumbObj;
+        maxParams.minNumbObj = bestIndex + numberOfPoints >= randomSamples.size() ?
+                ((AdaBoostParameters)randomSamples.get(randomSamples.size() - 1)).minNumbObj :
+                ((AdaBoostParameters)randomSamples.get(bestIndex + numberOfPoints)).minNumbObj;
     }
 
     @Override
@@ -98,20 +111,25 @@ public class AdaBoostTrainer extends AbstractTrainer {
         ScatterCharter charter = new ScatterCharter();
         ArrayList<ArrayList<ScatterPoint>> numIterations = new ArrayList<ArrayList<ScatterPoint>>();
         ArrayList<ArrayList<ScatterPoint>> weightThreshold = new ArrayList<ArrayList<ScatterPoint>>();
+        ArrayList<ArrayList<ScatterPoint>> minNumbObj = new ArrayList<ArrayList<ScatterPoint>>();
 
         for(ArrayList<AbstractHyperParameters> round : allParamsTested) {
             ArrayList<ScatterPoint> numIterationsRound = new ArrayList<ScatterPoint>();
             ArrayList<ScatterPoint> weightThresholdRound = new ArrayList<ScatterPoint>();
+            ArrayList<ScatterPoint> minNumbObjRound = new ArrayList<ScatterPoint>();
             for(AbstractHyperParameters p : round) {
                 AdaBoostParameters a = (AdaBoostParameters)p;
                 numIterationsRound.add(new ScatterPoint(a.numIterations, a.errorPercentage));
                 weightThresholdRound.add(new ScatterPoint(a.weightThreshold, a.errorPercentage));
+                minNumbObjRound.add(new ScatterPoint(a.minNumbObj, a.errorPercentage));
             }
             numIterations.add(numIterationsRound);
             weightThreshold.add(weightThresholdRound);
+            minNumbObj.add(minNumbObjRound);
         }
 
-        charter.createChart(numIterations, "Number of Iterations", "Error Rate", "NumberOfIterations");
-        charter.createChart(weightThreshold, "Weight Threshold", "Error Rate", "WeightThreshold");
+        charter.createChart(numIterations, "Number of Iterations", "Error Rate", "Number of Iterations");
+        charter.createChart(weightThreshold, "Weight Threshold", "Error Rate", "Weight Threshold");
+        charter.createChart(minNumbObj , "Minimum Number of Objects", "Error Rate", "AdaBoost Minimum Number of Objects");
     }
 }

@@ -46,6 +46,7 @@ public class J48Trainer extends AbstractTrainer {
         j48.setMinNumObj(((J48Parameters)params).minNumObj);
         j48.setNumFolds(((J48Parameters)params).numFold);
         j48.setConfidenceFactor(((J48Parameters)params).confidenceFactor);
+        j48.setReducedErrorPruning(true);
         classifier = j48;
     }
 

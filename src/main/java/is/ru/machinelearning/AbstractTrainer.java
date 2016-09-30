@@ -4,10 +4,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -29,6 +26,8 @@ public abstract class AbstractTrainer implements ClassifierTrainer{
 
     protected Properties properties = new Properties();
 
+    private Writer writer;
+
     private Logger logger =
             Logger.getLogger(getClass().getName());
 
@@ -38,13 +37,15 @@ public abstract class AbstractTrainer implements ClassifierTrainer{
     }
 
     public TrainerOutput train() {
+
         // Create and train on samples until break condition is met
         while(continueTraining()) {
             loadSamples();
             int i = 0;
             for(AbstractHyperParameters params : randomSamples ) {
                 i++;
-                System.out.println(i + " " + params + ". error: " + params.errorPercentage);
+                System.out.print(i + " " + params + ", error: ");
+                logResults(i + " " + params + ", error: ");
                 newClassifier(params);
 
                 try {
@@ -54,13 +55,16 @@ public abstract class AbstractTrainer implements ClassifierTrainer{
                 catch (Exception e) {
                     e.printStackTrace();
                 }
+                System.out.println(params.errorPercentage);
+                logResults(params.errorPercentage + "\r\n");
             }
             afterRound();
             updateParametersIntervals();
+            plotTrainingInfo();
         }
 
-        plotTrainingInfo();
         System.out.println(bestEvaluation.toSummaryString());
+        logResults(bestEvaluation.toSummaryString());
         return new TrainerOutput(bestClassifier, bestEvaluation);
     }
 
@@ -150,6 +154,24 @@ public abstract class AbstractTrainer implements ClassifierTrainer{
         }
 
         return bestIndex;
+    }
+
+    private void logResults(String result) {
+        try {
+            File file = new File(getClass().getName() + ".txt");
+            file.createNewFile();
+            FileOutputStream oFile = new FileOutputStream(file, true);
+            writer = new BufferedWriter(new OutputStreamWriter(oFile, "utf-8"));
+            writer.write(result);
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {writer.close();} catch (IOException e) {e.printStackTrace();}
+        }
     }
 
     /**
