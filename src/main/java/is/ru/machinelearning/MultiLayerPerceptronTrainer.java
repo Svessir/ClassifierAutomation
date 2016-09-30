@@ -81,8 +81,8 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
     }
 
     protected void loadSamples() {
-        System.out.println("minParams: " + minParams);
-        System.out.println("maxParams: " + maxParams);
+        //System.out.println("minParams: " + minParams);
+        //System.out.println("maxParams: " + maxParams);
         randomSamples.clear();
         Random rand = new Random();
         for(int i = 0; i < numberOfSamples; i++) {
@@ -215,7 +215,7 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
             learningRate.add(learningRateRound);
             momentum.add(momentumRound);
             validationSetSize.add(validationSetSizeRound);
-            validationThreshold.add(validationSetSizeRound);
+            validationThreshold.add(validationThresholdRound);
             trainingTime.add(trainingTimeRound);
         }
 
@@ -227,7 +227,7 @@ public class MultiLayerPerceptronTrainer extends AbstractTrainer {
     }
 
     private double getRandomLogScaleValue(double base, int minExponent, int maxExponent, Random rand) {
-        int randomExponent = minExponent + (int)(rand.nextDouble() * ((maxExponent - minExponent) + 1));
+        int randomExponent = rand.nextInt((maxExponent - minExponent) + 1) + minExponent;
         return Math.pow(base, randomExponent);
     }
 

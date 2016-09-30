@@ -7,9 +7,6 @@
     <bean id="ada-boost" class="is.ru.machinelearning.AdaBoostTrainer"/>
     <bean id="knn" class="is.ru.machinelearning.KnnTrainer"/>
     <bean id="mlp" class="is.ru.machinelearning.MultiLayerPerceptronTrainer"/>
-    <!--Add NeuralNetwork-->
-    <!--Add BayesNaive-->
-    <!--Add Bagging-->
 
     <bean id="trainers" class="java.util.ArrayList">
         <constructor-arg>
